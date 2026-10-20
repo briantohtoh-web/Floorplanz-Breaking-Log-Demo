@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FloorPlanz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f3ec; --card:#fffdf8; --ink:#1d1c1a; --ink2:#5d5a54; --line:#d9d3c7;
+  --accent:#2747a8; --accent-soft:#dfe5f7; --hold:#c2410c; --trans:#0f766e; --new:#c2410c;
+  --toprock:#a0761a; --footwork:#3b7d3b; --power:#9b3468; --freeze:#2747a8; --transition:#a9a398;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#171614; --card:#211f1c; --ink:#f1ede4; --ink2:#a9a398; --line:#3a3631;
+    --accent:#8ea6ff; --accent-soft:#27304f; --hold:#fb923c; --trans:#2dd4bf; --new:#fb923c;
+    --toprock:#e0b54a; --footwork:#86c986; --power:#e58ab8; --freeze:#8ea6ff; --transition:#6b665e; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark; --paper:#171614; --card:#211f1c; --ink:#f1ede4; --ink2:#a9a398; --line:#3a3631;
+  --accent:#8ea6ff; --accent-soft:#27304f; --hold:#fb923c; --trans:#2dd4bf; --new:#fb923c;
+  --toprock:#e0b54a; --footwork:#86c986; --power:#e58ab8; --freeze:#8ea6ff; --transition:#6b665e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:16px;padding-block:10px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));border-bottom:1px solid var(--line);flex-wrap:wrap}
+h1{font:600 20px/1 'IBM Plex Mono',monospace;margin:0}
+h1 small{font:400 12px Inter,sans-serif;color:var(--ink2);margin-left:8px}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+.pill,nav button{border:1px solid var(--line);background:var(--card);padding:6px 13px;border-radius:999px;cursor:pointer}
+nav button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pill:hover,nav button:hover{border-color:var(--ink2)}
+.pill.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.pill.on{background:var(--accent-soft);border-color:var(--accent)}
+.pill.sm{padding:3px 9px;font-size:12px}
+.spacer{flex:1}
+main{padding-block:14px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.view{display:none}.view.on{display:block}
+.cols{display:grid;grid-template-columns:290px minmax(0,1fr) 300px;gap:14px;align-items:start}
+@media (max-width:1150px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+h3{margin:0 0 8px;font:600 12px/1.2 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--ink2)}
+label{display:block;font-size:12px;color:var(--ink2);margin:8px 0 3px}
+input,select,textarea{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+textarea{min-height:52px;resize:vertical}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.note{font-size:12px;color:var(--ink2)}
+.kbd{font:11px ui-monospace,monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink2)}
+.seg2{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:8px}
+.seg2 button{flex:1;border:0;background:transparent;padding:6px;cursor:pointer}
+.seg2 button.on{background:var(--ink);color:var(--paper)}
+.lib{max-height:68vh;overflow:auto;margin-top:6px}
+.grp{margin:10px 0 4px;font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.grp i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.item{display:flex;gap:8px;align-items:center;padding:5px 6px;border-radius:8px;cursor:pointer}
+.item:hover{background:var(--paper)}.item.on{background:var(--accent-soft)}
+.item .meta{color:var(--ink2);font-size:12px}
+.item b{font-weight:600}
+.count{margin-left:auto;font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:0 7px}
+.sub{margin:2px 0 6px 14px;border-left:2px solid var(--line);padding-left:6px}
+.tag{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.t-toprock{color:var(--toprock)}.t-footwork{color:var(--footwork)}.t-powermove,.t-power{color:var(--power)}.t-freeze{color:var(--freeze)}
+.t-sequence,.t-acro,.t-pose,.t-transition{color:var(--ink2)}
+.stagebox{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.stagebox.nofoot{background:var(--card)}
+#yt,#yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+#tl{width:100%;height:40px;display:block;cursor:pointer;margin-top:8px}
+.credit{font-size:12px;color:var(--ink2);margin-top:6px}
+.credit a,.minfo a,.card a{color:var(--accent)}
+.minfo{font-size:12px;color:var(--ink2);margin-top:6px;border-left:2px solid var(--line);padding-left:8px}
+.minfo b{color:var(--ink)}
+.mitem{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:13px;display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:6px;cursor:pointer}
+.x{cursor:pointer;color:var(--ink2)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--ink2);margin-top:4px}
+.legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;display:inline-flex;gap:5px;align-items:center}
+.chip:hover{border-color:var(--ink2)}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:200px;padding:12px;border:1.5px dashed var(--line);border-radius:12px}
+.chain .empty{color:var(--ink2);margin:auto;text-align:center;max-width:360px}
+.mcard{width:150px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px;text-align:center;position:relative}
+.mcard canvas{width:120px;height:120px;display:block;margin:0 auto;border-radius:10px;background:var(--paper)}
+.mcard .nm{font-weight:600;margin-top:4px}
+.mcard .cx{position:absolute;top:4px;right:8px}
+.link{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:62px}
+.link .arr{font-size:22px;line-height:1}
+.link .st{font-size:10px;border-radius:999px;padding:0 6px;border:1px solid currentColor;white-space:nowrap}
+.st.new{color:var(--new)}.st.done{color:var(--ink)}.st.seen{color:var(--accent)}.st.idea{color:var(--hold)}
+.linknote{font-size:12px;color:var(--ink2);margin-top:4px}
+.next h4{margin:12px 0 4px;font-size:12px;color:var(--ink2);font-weight:500}
+.gwrap{position:relative;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto}
+.gcanvas{position:relative;min-width:560px;height:460px}
+#gsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.gcol{position:absolute;top:12px;font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.1em;transform:translateX(-50%)}
+.gnode{position:absolute;transform:translate(-50%,-50%);font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.gnode.has{border-color:var(--ink)}.gnode.inchain{background:var(--accent-soft);border-color:var(--accent)}
+.card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:var(--paper)}
+.card .when{font-size:11px;color:var(--ink2)}
+.arrow{color:var(--ink2);font-size:12px}
+.log{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:999px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.doc{max-width:760px;margin:0 auto;line-height:1.6;font-size:15px}
+.doc h2{font:600 13px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin:28px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+.doc p,.doc li,.doc dd{color:var(--ink)}.doc ul,.doc ol{padding-left:22px}.doc li{margin-bottom:6px}
+.doc .warn{border:2px solid var(--hold);border-radius:12px;padding:14px 16px;background:var(--card);font-size:16px}
+.doc .refs dt{font-weight:600;margin-top:12px}.doc .refs dd{margin:2px 0 0 0;font-size:14px}
+.doc a{color:var(--accent)}.doc kbd{border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px;background:var(--card)}
+</style>
+</head>
+<body>
+<header>
+  <h1>FloorPlanz <small>a breaking set dictionary · prototype, built on BRACE</small></h1>
+  <nav>
+    <button data-view="start" class="on">Start here</button>
+    <button data-view="watch">1 · Watch &amp; name</button>
+    <button data-view="connect">2 · Connect</button>
+    <button data-view="log">3 · Sets &amp; ideas</button>
+    <button data-view="clip">4 · My sessions</button>
+  </nav>
+  <div class="spacer"></div>
+  <button class="pill sm" id="exportBtn">Export JSON</button>
+  <label class="pill sm" style="margin:0">Import<input type="file" id="importIn" accept=".json" hidden></label>
+</header>
+
+<main>
+<!-- 0 START HERE -->
+<section class="view on" id="v-start">
+<article class="doc">
+<div class="warn">
+  <b>Read this first.</b> This whole thing is vibe coded: I sketched it with an AI coding assistant over a couple of days. Use it with caution. Nothing really works properly yet. Recognition is guesswork, things will break, and your data only lives in this browser. It's a <b>proof of concept</b>, a way of showing what a breaking set dictionary could be, not a finished tool.
+</div>
+
+<h2>What this is</h2>
+<p><b>FloorPlanz</b> is a first sketch of a <b>breaking set dictionary and calculator</b>. The idea: give it footage and it logs your set. Which moves, in what order, how they chain, who did them first. For now you do most of the naming by hand, and the app helps you see, connect and remember the moves.</p>
+<p>It's Part 1 of my <i>Dreams in Draft</i> series: pipe dreams I'm putting on the internet so they exist somewhere outside my head.</p>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li><b>1 · Watch &amp; name.</b> Browse Red Bull BC One rounds with a skeleton drawn over the dancer, or 3D motion-capture clips you can rotate. Use <kbd>I</kbd> / <kbd>O</kbd> to set In and Out around a move, then pick its name from the dropdown (139 moves; typing a nickname snaps to the main name). <b>By move</b> groups everything into Toprock / Footwork / Power / Freeze, including moves from your own sessions. <b>Detected freezes</b> are 103 moments where the body goes still; none of them have names yet.</li>
+  <li><b>2 · Connect.</b> Click moves to build a chain. Each arrow tells you whether that transition is in a set you can already do, was seen back to back in a BC One round, or has never been connected. <b>Where next</b> suggests transitions you haven't tried. <b>One in the chamber</b> gives you two random moves to join (an idea from The Break).</li>
+  <li><b>3 · Sets &amp; ideas.</b> The gym-app side. Log sets you can do, and ideas you can't try right now (injured, no floor, on a train). Tick "I did it" when you land one. Combos you save from your sessions show up here too.</li>
+  <li><b>4 · My sessions.</b> Your own footage. Pick a clip, or add your own (they stay in this browser). Press <b>Track my body only</b> to put a skeleton on it. Set In/Out around each move and name it, the same as in tab 1. Save the whole sequence as a <b>combo</b>, then <b>Recognise moves</b> to see whether it can spot your moves and combos in other clips. Rename sessions and clips with ✎. Custom names are fine: not every move has a name, and not every combo is strict. I label toprock and footwork loosely ("random top rock combo", "6 step 3 step combo") because that's where breaking is most free, and only power moves and freezes get their own exact names.</li>
+  <li><b>Back up.</b> Press <b>Export JSON</b> now and then. Clearing your browser data wipes everything.</li>
+</ol>
+
+<h2>What works, what doesn't</h2>
+<ul>
+  <li><b>Works-ish:</b> naming and connecting moves, combos, sessions, body tracking on clear single-dancer footage.</li>
+  <li><b>Barely:</b> recognition. It compares body shapes against moves you've labelled yourself. On the clip it learned from it scores 8/8, which proves nothing because it's marking its own homework. On two clips it had never seen, it found nothing on one and called footwork a chair freeze on the other.</li>
+  <li><b>Breaks:</b> upside-down and spinning bodies (the tracker was trained on people standing up), several people in frame, dark footage, long clips, phones.</li>
+  <li><b>Not built:</b> flavour, personal style, "who did it first", timing on the beat, live battle analytics.</li>
+</ul>
+
+<h2>Where the data comes from</h2>
+<dl class="refs">
+  <dt>BRACE: the Breakdancing Competition Dataset</dt>
+  <dd>Davide Moltisanti, Jinyi Wu, Bo Dai &amp; Chen Change Loy. ECCV 2022. NTU S-Lab, Singapore, with Shanghai AI Lab. A 2D skeleton on every frame of Red Bull BC One battles, with segments labelled toprock / footwork / powermove. That's where the skeletons in tab 1 come from. <a href="https://arxiv.org/abs/2207.10120" target="_blank" rel="noopener">Paper</a> · <a href="https://github.com/dmoltisanti/brace" target="_blank" rel="noopener">Data</a>. Licence: S-Lab License 1.0, <b>non-commercial only</b>. I fixed the frame rates per video (57 at 25 fps, 23 at 30 fps) and relabelled clips "who vs who", because the dancer tags were often wrong. The freeze detection is mine, not BRACE's.</dd>
+  <dt>Red Bull BC One footage</dt>
+  <dd>The video under the skeletons. It's embedded from Red Bull's own YouTube uploads, never downloaded or copied. Red Bull owns it, and the dancers in it never agreed to be training data (see Ethics below).</dd>
+  <dt>CMU Graphics Lab Motion Capture Database</dt>
+  <dd>Carnegie Mellon University, <a href="http://mocap.cs.cmu.edu" target="_blank" rel="noopener">mocap.cs.cmu.edu</a>. Subject 85 ("jumps; flips; breakdance") and trial 90_28: 3D marker motion capture. I kept CMU's original trial names and added my own classification, because the names are often off. "90TwistsFall" is actually four swipes and a fall, for example.</dd>
+  <dt>FraGue's Breakdance Move List</dt>
+  <dd>FraGue Moser-Kindler, <a href="https://www.frague.at/breakdance-move-list/" target="_blank" rel="noopener">frague.at</a>. 136 moves with nicknames, who taught them and, for a few, who created them (Roxrite's Corkstep, Penny's 6 Step, Pepito's Sweep, Crumbs' Starwalk). It's the backbone of the naming dropdown.</dd>
+  <dt>Wikipedia</dt>
+  <dd>Short definitions for 13 moves (CC BY-SA).</dd>
+  <dt>MediaPipe Pose Landmarker</dt>
+  <dd>Google (Apache 2.0). Tracks the body in your own clips, running entirely in your browser. Nothing is uploaded.</dd>
+  <dt>Your own clips</dt>
+  <dd>The three demo clips in "Session · 20 Oct 2026" are my own training footage.</dd>
+</dl>
+
+<h2>Research I read</h2>
+<dl class="refs">
+  <dt>Why computers can't see breaking yet</dt>
+  <dd><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8074772/" target="_blank" rel="noopener">Needham, Evans, Cosker &amp; Colyer 2021</a>, <i>Sensors</i>: markerless pose tracking does well on sprinting and fails on unusual body positions, because the models only learned from everyday upright photos.<br>
+  <a href="https://www.biorxiv.org/content/10.1101/2020.04.15.010702v1.full" target="_blank" rel="noopener">Labuguen, Ingco, Kogami, Blanco Negrete &amp; Shibata 2020</a>: on pop dance, markerless tracking is close to marker mocap on average, but fails when limbs hide each other.<br>
+  <a href="https://imt-mines-ales.hal.science/hal-03344404/document" target="_blank" rel="noopener">Desmarais, Mottet, Slangen &amp; Montesinos 2021</a>: a review of 3D pose methods. The lab benchmarks they're tested on don't have headspins in them.</dd>
+  <dt>Breaking as sport and data</dt>
+  <dd><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11685194/" target="_blank" rel="noopener">Lerebourg &amp; Guignard 2024</a>: models performance in breaking and argues it needs notation and video coding. Its toprock / footwork / power / freeze split shapes the columns here.<br>
+  <a href="https://arxiv.org/abs/2510.20287" target="_blank" rel="noopener">Dhar, Ramakrishnan &amp; Munson 2025</a>: video AI on BRACE's three labels. Best about 69% of frames right. Named moves not attempted.<br>
+  <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12708583/" target="_blank" rel="noopener">Sato et al. 2025</a> and <a href="https://arxiv.org/abs/2511.00553" target="_blank" rel="noopener">Braeunig 2025</a>: Paris 2024 Olympic judging. Judges agreed most on originality, and there's evidence of home-nation bias.</dd>
+  <dt>Archives and movement</dt>
+  <dd>Sarah Whatley 2017, on digital dance archives and what gets recorded. Étienne-Jules Marey's chronophotographs inspired the frame-by-frame view in tab 1.</dd>
+  <dt>Datasets that don't quite fit (yet)</dt>
+  <dd>AIST++ (breaking is about 10% of it, mostly simple upright moves), Motorica Dance Dataset (hip hop, popping, locking, krump; no breaking), DanceFlow / DanceCrafter (Yuan et al. 2026; has a breaking genre with long text descriptions, not move names, and its code isn't out yet), FineGym (gymnastics with 99 named elements, which is the model for what a breaking version could look like).</dd>
+</dl>
+
+<h2>People already doing pieces of this</h2>
+<ul>
+  <li><b>MovesBook</b> (movesbook.app) by Beppe Monteleone, bboy Thai-Rock: the closest thing to this. A training journal, move library, lineage tree and sets with an energy curve. No AI, on purpose. I'd rather work with them than compete.</li>
+  <li><b>The Break</b> (thebreak.app) by Scott Tolinski: move book, battle mode, and "One in the chamber". The gym-app side, already built.</li>
+  <li><b>Breakbitebase</b> (@breakbitebase on Instagram): side-by-side clips, and the comments decide "bite or base". The closest thing to a "who did it first" archive, and it's community-run.</li>
+  <li><b>Tricking:</b> Loopkicks Tricktionary, TrickAtlas, Trickipedia. <b>BJJ:</b> GrappleMap. Each is a move map in its own discipline.</li>
+  <li><b>Inspiration:</b> <i>Floor Kids</i> (MERJ Media) for the love of breaking movement drawn frame by frame. <i>Wandance</i> (Coffee) for showing dance on the page. And my own childhood wish for a dance dictionary.</li>
+</ul>
+
+<h2>Ethics: the part I'm unsure about</h2>
+<p>Motion data for breaking excites me. It could change how tech understands bodies. But the easy way to make money from this is selling the data, and I don't want big tech profiting off my friends. Even BRACE, the data this is built on, uses breakers who never agreed to be training data. If this ever becomes real, it's consent first: dancers opt in, the community holds the data, and money flows back. I'm looking at Te Hiku Media's Kaitiakitanga licence as one model.</p>
+<p>I also don't want AI to be the one doing this. The prototype was sketched with AI, but a real version needs b-boys and b-girls who care about the history, building it together. It shouldn't become a points game or an automated judge.</p>
+
+<h2>Where it could go</h2>
+<ol>
+  <li>Recognise combos you've labelled before, in new footage.</li>
+  <li>Spot variations: a step cut, a move added, the order swapped.</li>
+  <li>Timing: you slowed a move down on the beat, held a freeze longer.</li>
+  <li>Flavour: your six-step versus a standard one. Your personal style.</li>
+  <li>Name every move specifically, even inside free-flowing toprock and footwork, once enough breakers have labelled enough clips. That needs a community.</li>
+  <li>The big one: a dictionary that remembers who did it first, and live battle analytics like Hawk-Eye in tennis or MLB Gameday.</li>
+</ol>
+
+<h2>Tech notes, for the curious</h2>
+<ul>
+  <li>One HTML page plus a few scripts. No server, no account, no tracking. Everything you name is saved in your browser's local storage, and uploaded videos in IndexedDB.</li>
+  <li>Body tracking: MediaPipe in the browser, sampled while the clip plays. With several people in frame it follows whoever is closest to the first body it found.</li>
+  <li>Move suggestions: the clip is split where the body changes most (dynamic programming over joint motion).</li>
+  <li>Recognition: each frame becomes a body-shape fingerprint (13 joints relative to the hips, scaled by torso length, mirrored too) and is matched against the moves you've labelled. Combos are matched by move order, allowing gaps.</li>
+  <li>Freeze detection on BRACE: the body almost still (joints moving under 3.5% of torso length) for at least 0.45s while low or upside down.</li>
+</ul>
+
+<h2>Credits</h2>
+<p>Made by Brian Toh (screendance filmmaker, b-boy) with an AI coding assistant, October 2026. Data from BRACE (NTU Singapore), the CMU Graphics Lab, FraGue Moser-Kindler and Wikipedia, with footage from Red Bull BC One. Thanks to everyone whose moves are in here, named or not.</p>
+<p><button class="pill" onclick="document.querySelector('nav button[data-view=watch]').click()">Start: 1 · Watch &amp; name</button> <button class="pill" onclick="document.querySelector('nav button[data-view=clip]').click()">Go to My sessions</button></p>
+</article>
+</section>
+
+<!-- 1 WATCH & NAME -->
+<section class="view" id="v-watch">
+  <div class="cols">
+    <div class="panel">
+      <div class="seg2"><button id="libMoves" class="on">By move</button><button id="libClips">By clip</button></div>
+      <div id="libMovesBox">
+        <input id="mSearch" placeholder="search moves…">
+        <div class="lib" id="moveLib"></div>
+      </div>
+      <div id="libClipsBox" hidden>
+        <div class="row">
+          <select id="fSrc" style="flex:1"><option value="">all sources</option><option value="brace">BC One battles</option><option value="cmu">CMU mocap (3D)</option></select>
+          <select id="fType" style="flex:1"><option value="">all types</option><option>toprock</option><option>footwork</option><option>powermove</option><option>freeze</option><option>sequence</option><option>acro</option><option>pose</option></select>
+        </div>
+        <input id="fDancer" placeholder="breaker or battle…" style="margin-top:6px">
+        <div class="note" id="clipCount" style="margin-top:6px"></div>
+        <div class="lib" id="clipLib"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="stagebox" id="stage"><div id="yt"></div><canvas id="cv" width="1280" height="720"></canvas></div>
+      <canvas id="tl" width="1280" height="40"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--toprock)"></i>toprock</span><span><i style="background:var(--footwork)"></i>footwork</span>
+        <span><i style="background:var(--power)"></i>power</span><span><i style="background:var(--freeze)"></i>freeze</span>
+        <span><i style="border:2px solid var(--accent)"></i>your named moves</span>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="pill" id="playBtn">▶ Play</button>
+        <select id="speed" style="width:auto"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option></select>
+        <button class="pill" id="inBtn">In <span class="kbd">I</span></button>
+        <button class="pill" id="outBtn">Out <span class="kbd">O</span></button>
+        <button class="pill" id="holdBtn">Hold <span class="kbd">H</span></button>
+        <button class="pill" id="exitBtn">Exit <span class="kbd">E</span></button>
+        <button class="pill sm" id="clearBtn">clear</button>
+        <span class="spacer"></span>
+        <button class="pill sm on" id="footBtn">Footage</button>
+        <button class="pill sm on" id="skelBtn">Skeleton</button>
+        <button class="pill sm" id="soundBtn">Sound</button>
+        <button class="pill sm" id="onionBtn">Onion</button>
+        <button class="pill sm" id="chronoBtn">Chronophotograph</button>
+      </div>
+      <div class="row" id="syncRow" style="margin-top:6px">
+        <span class="note">Skeleton off the dancer?</span>
+        <button class="pill sm" id="syncMinus">◀ earlier</button><button class="pill sm" id="syncPlus">later ▶</button>
+        <span class="note" id="syncTxt"></span>
+      </div>
+      <div class="row" id="angleRow" style="display:none;margin-top:6px">
+        <span class="note">3D view</span>
+        <input type="range" id="yaw" min="-180" max="180" value="30" style="flex:1">
+        <input type="range" id="pitch" min="-10" max="80" value="20" style="width:120px">
+        <span class="note" id="angleTxt"></span>
+      </div>
+      <div class="credit" id="credit"></div>
+      <div class="note" style="margin-top:6px"><span class="kbd">space</span> play · <span class="kbd">←</span><span class="kbd">→</span> step · left limbs dark, right limbs blue · skeletons: BRACE (Moltisanti et al. 2022), footage streamed from Red Bull's YouTube · 3D: CMU Graphics Lab Motion Capture Database · names: FraGue's Breakdance Move List · definitions: Wikipedia</div>
+    </div>
+
+    <div class="panel">
+      <h3>Name this move</h3>
+      <label>Move</label>
+      <input id="mName" list="moveNames" placeholder="windmill, swipe, baby freeze…">
+      <datalist id="moveNames"></datalist>
+      <div class="minfo" id="moveInfo" hidden></div>
+      <label>Column</label>
+      <select id="mCol"><option>Toprock</option><option>Footwork</option><option>Power</option><option>Freeze</option></select>
+      <label>Flavour / variant</label>
+      <input id="mVar" placeholder="hook sweep, no-hand, on the elbow…">
+      <label>Notes</label>
+      <textarea id="mNotes" placeholder="what makes it theirs? who is it?"></textarea>
+      <div class="row" style="margin-top:10px"><button class="pill primary" id="saveBtn">Save move</button></div>
+      <h3 style="margin-top:16px">Named on this clip</h3>
+      <div id="clipMoves"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 CONNECT -->
+<section class="view" id="v-connect">
+  <div class="cols">
+    <div class="panel">
+      <h3>Moves</h3>
+      <input id="pSearch" placeholder="search, or type a new move + Enter">
+      <div class="note" style="margin:6px 0">Click to add to the chain. <span class="chip" style="pointer-events:none"><span class="dot"></span>has a clip</span></div>
+      <div class="lib" id="palette"></div>
+    </div>
+    <div>
+      <div class="panel">
+        <h3>Your chain</h3>
+        <div class="chain" id="chain"></div>
+        <div class="row" style="margin-top:10px">
+          <input id="chainName" placeholder="name this set (optional)" style="flex:1;min-width:180px">
+          <button class="pill primary" id="saveSet">Save · I can do this</button>
+          <button class="pill" id="saveIdea">Save · idea to try</button>
+          <button class="pill sm" id="clearChain">clear</button>
+        </div>
+      </div>
+      <div class="gwrap"><div class="gcanvas" id="gcanvas"><svg id="gsvg"></svg></div></div>
+      <div class="legend"><span><i style="background:var(--ink)"></i>in a set you can do</span><span><i style="background:var(--accent)"></i>seen back to back in a BC One round</span><span><i style="background:var(--hold)"></i>idea, not tried</span></div>
+    </div>
+    <div class="panel next" id="nextPanel"></div>
+  </div>
+</section>
+
+<!-- 3 LOG -->
+<section class="view" id="v-log">
+  <div class="log">
+    <div class="panel"><h3>Sets I can do</h3><div id="setList"></div></div>
+    <div class="panel"><h3>Ideas to try</h3><div id="ideaList"></div></div>
+    <div class="panel"><h3>Combos</h3><div class="note">Sequences you saved from your sessions.</div><div id="comboList"></div></div>
+    <div class="panel"><h3>Seen in BC One rounds</h3><div class="note">Moves you named back to back in one round.</div><div id="seenList"></div></div>
+  </div>
+</section>
+
+<!-- 4 YOUR CLIP -->
+<section class="view" id="v-clip">
+  <div class="cols">
+    <div class="panel">
+      <h3>My sessions</h3>
+      <div id="sessList"></div>
+      <div class="row" style="margin-top:8px">
+        <label class="pill sm" style="margin:0;cursor:pointer">+ add clips<input type="file" id="clipFile" accept="video/*" multiple hidden></label>
+        <button class="pill sm" id="sessNew">+ new session</button>
+      </div>
+      <div class="note" id="clipStatus" style="margin-top:6px">Pick a clip. Videos you add are kept in this browser, on this computer.</div>
+      <h3 style="margin-top:16px">Skeleton + suggestions (optional)</h3>
+      <div class="row"><button class="pill primary" id="clipRecognise">Recognise moves</button><button class="pill" id="clipTrack">Track my body only</button></div>
+      <div class="note" style="margin-top:6px">Recognise tracks the body, then compares every moment with the moves you've labelled before (and their mirror image), and checks for combos you've saved.</div>
+      <label for="clipSeq">Suggest moves from what you did, in order</label>
+      <textarea id="clipSeq" placeholder="handstand > baby freeze > chair freeze > …"></textarea>
+      <div class="row" style="margin-top:6px"><button class="pill sm" id="clipSuggest">Suggest where each move is</button></div>
+      <div class="note" style="margin-top:8px">Suggestions are a first guess from where your shape stays steadiest. No app can recognise a move by name yet, so you check and fix each one. Every move you name is an example it could learn from.</div>
+    </div>
+    <div>
+      <div class="stagebox" id="clipStage" style="aspect-ratio:9/16;height:72vh;width:auto;max-width:100%;margin:0 auto"><video id="clipVideo" playsinline style="position:absolute;inset:0;width:100%;height:100%"></video><canvas id="clipCanvas" style="position:absolute;inset:0;width:100%;height:100%;cursor:pointer"></canvas></div>
+      <canvas id="clipTl" width="1280" height="40" style="width:100%;height:40px;display:block;cursor:pointer;margin-top:8px"></canvas>
+      <div class="row" style="margin-top:8px">
+        <button class="pill" id="clipPlay">▶ Play</button>
+        <select id="clipSpeed" style="width:auto"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option></select>
+        <button class="pill" id="clipIn">In <span class="kbd">I</span></button>
+        <button class="pill" id="clipOut">Out <span class="kbd">O</span></button>
+        <button class="pill sm" id="clipClear">clear</button>
+        <span class="spacer"></span>
+        <button class="pill sm on" id="clipSkel">Skeleton</button>
+        <button class="pill sm on" id="clipLabels">Labels</button>
+      </div>
+      <div class="note" style="margin-top:6px"><span class="kbd">space</span> play · <span class="kbd">←</span><span class="kbd">→</span> step a frame · set In and Out around a move, name it, save. Click a named move to adjust it.</div>
+    </div>
+    <div class="panel">
+      <h3>Name this move</h3>
+      <label for="clipName">Move</label>
+      <input id="clipName" list="moveNames" placeholder="handstand, baby freeze, air baby…">
+      <div class="minfo" id="clipInfo" hidden></div>
+      <label for="clipCol">Column</label>
+      <select id="clipCol"><option>Toprock</option><option>Footwork</option><option>Power</option><option selected>Freeze</option></select>
+      <label for="clipVar">Flavour / variant</label>
+      <input id="clipVar" placeholder="right hand, tucked, on the elbow…">
+      <div class="row" style="margin-top:10px"><button class="pill primary" id="clipSave">Save move</button><button class="pill" id="clipUpdate" hidden>Update</button></div>
+      <h3 style="margin-top:16px">Named on this clip</h3>
+      <div id="clipMoves"></div>
+      <div class="row" style="margin-top:8px"><button class="pill sm" id="clipCopy">Copy timings</button><button class="pill sm" id="clipComboBtn">Save as a combo</button></div>
+      <div id="clipComboAsk" hidden style="margin-top:8px;border:1px solid var(--accent);border-radius:10px;padding:8px">
+        <div class="note">Save this combo?</div>
+        <input id="clipComboName" placeholder="name it, e.g. Basic Freeze Stack combo" style="margin-top:4px">
+        <div class="row" style="margin-top:6px"><button class="pill primary sm" id="clipComboSave">Save combo</button><button class="pill sm" id="clipComboCancel">Not now</button></div>
+      </div>
+      <h3 style="margin-top:16px">Recognised</h3>
+      <div id="clipRecog"><div class="note">Press Recognise moves to see what the app finds by itself.</div></div>
+      <h3 style="margin-top:16px">Your combos</h3>
+      <div id="clipCombos"></div>
+    </div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="seed.js"></script>
+<script src="brace-subset.js"></script>
+<script src="cmu-subset.js"></script>
+<script src="moves.js"></script>
+<script type="module" src="clip-mode.js"></script>
+<script>
+(() => {
+// ---------- data ----------
+const COLS = ['Toprock','Footwork','Power','Freeze'];
+const COLVAR = {Toprock:'--toprock', Footwork:'--footwork', Power:'--power', Freeze:'--freeze'};
+const TYPE_COL = {toprock:'Toprock', footwork:'Footwork', powermove:'Power', power:'Power', freeze:'Freeze'};
+const MOVES = window.MOVES || [];
+const SEGS = [...(window.BRACE || []), ...(window.CMU || [])];
+const segById = Object.fromEntries(SEGS.map(s => [s.uid, s]));
+const norm = s => String(s||'').trim().toLowerCase();
+const moveByName = n => { const k = norm(n); return k ? MOVES.find(m => [m.name, ...m.aliases].some(x => norm(x)===k)) : null; };
+const canon = n => { const m = moveByName(n); return m ? m.name : String(n).trim(); };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const col = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const uid = () => Math.random().toString(36).slice(2,9);
+const toast = msg => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 1600); };
+
+// BRACE's per-round dancer tags are unreliable, so clips are labelled by battle ("who vs who") from the YouTube title
+function battleInfo(t){
+  const parts = String(t||'').split(/\s+\|\s*|\s+-\s+|\s+l\s+/).map(p => p.trim());
+  const who = (parts.find(p => /\bvs\.?\s/i.test(p)) || '').replace(/B-(Boy|Girl)\s+/gi, '').replace(/\s*\([A-Z]{2,3}\)/g, '').replace(/\bvs\.\s*/i, 'vs ').trim();
+  const stage = parts.find(p => /^(top \d+|quarter ?finals?|semi ?finals?|finals?|final battle|battle \d+)$/i.test(p)) || '';
+  return {who, stage};
+}
+SEGS.forEach(s => { if (!s.frames3){ const b = battleInfo(s.battle); s.who = b.who || `BC One ${s.year}`; s.stage = b.stage; } });
+
+// ---------- storage (same key as before, so earlier marks carry over) ----------
+const KEY = 'brace-marker-v1';
+let store = {moves:[], links:[], ideas:[], sets:[], sync:{}};
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.moves) store = Object.assign(store, s); } catch(e) {}
+store.ideas = store.ideas.map(i => Object.assign({notes:[], name:''}, i));
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e) {} };
+
+// ---------- 3D projection for CMU ----------
+const camCache = new WeakMap();
+function project(seg, yawDeg, pitchDeg){
+  const a = yawDeg*Math.PI/180, b = pitchDeg*Math.PI/180, ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), S = 22;
+  seg.frames = seg.frames3.map(f => { const o = []; for (let j=0;j<17;j++){ const x = f[j*3], y = f[j*3+1], z = f[j*3+2];
+    const X = x*ca + z*sa, D = -x*sa + z*ca, Y = y*cb - D*sb; o.push(Math.round(960 + X*S), Math.round(700 - Y*S)); } return o; });
+  camCache.delete(seg); delete seg.clean;
+}
+SEGS.filter(s => s.frames3).forEach(s => project(s, 30, 20));
+
+// ---------- clip helpers ----------
+const isCMU = s => s.source==='cmu';
+const tAt = (s, i) => isCMU(s) ? i/s.fps : (s.start + i*s.step)/s.vfps + (store.sync[s.video]||0);
+const ytUrl = (s, i) => isCMU(s) ? s.url : `https://www.youtube.com/watch?v=${s.video}&t=${Math.floor(tAt(s,i))}s`;
+const clipTitle = s => isCMU(s) ? `“${s.label}”` : s.who;
+const clipMeta = s => isCMU(s) ? `${s.dancer} · 3D mocap` : [s.stage, `BC One ${s.year}`].filter(Boolean).join(' · ');
+const srcLabel = src => { const s = segById[src.uid]; return s ? (isCMU(s) ? `${s.dancer} · “${s.label}”` : `${s.who} · BC One ${s.year}`) : (src.dancer || ''); };
+const roundKey = s => isCMU(s) ? s.uid : `${s.video}|${s.dancer}`; // BRACE's tag still separates the two breakers' rounds
+
+// moves you named in My sessions (tab 4), read from this browser's storage
+function sessionLabel(clip){ try { for (const s of JSON.parse(localStorage.getItem('brace-marker-sessions')) || []) for (const c of s.clips) if (c.file.split('/').pop()===clip) return `${s.name} · ${c.label}`; } catch(e) {} return clip; }
+const sessSegs = {};
+function sessionSeg(clip){
+  if (clip in sessSegs) return sessSegs[clip];
+  let seg = null;
+  try { const t = JSON.parse(localStorage.getItem('brace-marker-track:'+clip)); if (t && t.frames) { const fr = t.frames.map((f,i,a) => f || a.slice(0,i).reverse().find(Boolean) || a.find(Boolean)); if (fr[0]) seg = {uid:'mine:'+clip, source:'mine', frames: fr.map(f => f.flatMap(p => [p[0], p[1]])), fps:t.fps, step:1, start:0, vfps:t.fps}; } } catch(e) {}
+  return (sessSegs[clip] = seg);
+}
+let _sessMoves = null;
+function sessionMoves(){
+  if (_sessMoves) return _sessMoves;
+  const out = (_sessMoves = []);
+  try { Object.keys(localStorage).filter(k => k.startsWith('brace-marker-clip:')).forEach(k => { const clip = k.slice(18); (JSON.parse(localStorage.getItem(k)) || []).filter(m => typeof m.t0==='number').forEach(m => out.push({...m, clip})); }); } catch(e) {}
+  return out;
+}
+window.addEventListener('brace-sessions-changed', () => { _sessMoves = null; for (const k in sessSegs) delete sessSegs[k]; });
+// every clip of a named move: your marks + CMU classifications + moves from your sessions
+function clipsFor(name){
+  const k = norm(canon(name)), out = [];
+  sessionMoves().filter(m => norm(m.name)===k).forEach(m => { const seg = sessionSeg(m.clip), fps = seg ? seg.fps : 15; out.push({seg, a:Math.round(m.t0*fps), b:Math.round(m.t1*fps), mine:m}); });
+  store.moves.filter(m => norm(m.name)===k).forEach(m => { const s = segById[m.src.uid]; if (s) out.push({seg:s, a:m.src.fIn, b:m.src.fOut, mark:m}); });
+  SEGS.filter(s => s.suggest && norm(s.suggest)===k).forEach(s => out.push({seg:s, a:s.range ? Math.round(s.range[0]*s.fps) : 0, b:s.range ? Math.round(s.range[1]*s.fps) : s.frames.length-1, auto:true}));
+  return out;
+}
+function colOf(name){
+  const m = store.moves.find(x => norm(x.name)===norm(name)); if (m) return m.col;
+  const sm = sessionMoves().find(x => norm(x.name)===norm(name)); if (sm && sm.col) return sm.col;
+  const d = moveByName(name); return d ? d.col : 'Power';
+}
+function allMoveNames(){
+  const seen = new Map();
+  MOVES.forEach(m => seen.set(norm(m.name), m.name));
+  store.moves.forEach(m => { if (!seen.has(norm(m.name))) seen.set(norm(m.name), m.name); });
+  sessionMoves().forEach(m => { if (!seen.has(norm(m.name))) seen.set(norm(m.name), m.name); });
+  [...store.sets, ...store.ideas].forEach(c => c.path.forEach(n => { if (!seen.has(norm(n))) seen.set(norm(n), n); }));
+  return [...seen.values()];
+}
+
+// ---------- skeleton drawing ----------
+function cam(seg){
+  if (camCache.has(seg)) return camCache.get(seg);
+  const exts = [], cs = seg.frames.map(fr => {
+    const xs = fr.filter((_,i)=>i%2===0), ys = fr.filter((_,i)=>i%2===1);
+    exts.push(Math.max(Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys)));
+    const T = [5,6,11,12]; return [T.reduce((a,j)=>a+fr[j*2],0)/4, T.reduce((a,j)=>a+fr[j*2+1],0)/4];
+  });
+  const sorted = [...exts].sort((a,b)=>a-b), ext = Math.max(1, sorted[Math.floor(sorted.length*0.85)])*1.15, med = sorted[Math.floor(sorted.length/2)];
+  const bad = exts.map(e => e > med*2.2);
+  const good = exts.map((_,i) => { if (!bad[i]) return i; for (let d=1; d<exts.length; d++){ if (i-d>=0 && !bad[i-d]) return i-d; if (i+d<exts.length && !bad[i+d]) return i+d; } return i; });
+  bad.forEach((b,i) => { if (b) cs[i] = cs[good[i]]; });
+  seg.clean = good;
+  const K = 4, sm = cs.map((_,i) => { let sx=0,sy=0,n=0; for (let j=Math.max(0,i-K); j<=Math.min(cs.length-1,i+K); j++){ sx+=cs[j][0]; sy+=cs[j][1]; n++; } return [sx/n, sy/n]; });
+  const c = {ext, sm}; camCache.set(seg, c); return c;
+}
+const F = (seg, i) => { cam(seg); return seg.frames[seg.clean[Math.max(0, Math.min(seg.frames.length-1, i))]]; };
+function follow(seg, i, w, h, pad, ox=0, oy=0){
+  const {ext, sm} = cam(seg); const s = (Math.min(w,h) - 2*pad)/ext; const [cx,cy] = sm[Math.max(0, Math.min(sm.length-1, i))];
+  return (x,y) => [(x-cx)*s + w/2 + ox, (y-cy)*s + h/2 + oy];
+}
+const BONES_L = [[5,7],[7,9],[11,13],[13,15],[5,11]], BONES_R = [[6,8],[8,10],[12,14],[14,16],[6,12]];
+function drawFigure(ctx, fr, map, o={}){
+  const P = i => map(fr[i*2], fr[i*2+1]), lw = o.lw || 6;
+  ctx.save(); ctx.globalAlpha = o.alpha ?? 1; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const L = o.ink || col('--ink'), R = o.acc || col('--accent');
+  const line = (a,b,c,w) => { const [ax,ay] = P(a), [bx,by] = P(b);
+    if (o.outline){ ctx.strokeStyle = 'rgba(0,0,0,.65)'; ctx.lineWidth = w+4; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); }
+    ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); };
+  if (!o.outline){ const [s5,s6,h12,h11] = [P(5),P(6),P(12),P(11)]; ctx.fillStyle = o.fill || col('--accent-soft');
+    ctx.beginPath(); ctx.moveTo(...s5); ctx.lineTo(...s6); ctx.lineTo(...h12); ctx.lineTo(...h11); ctx.closePath(); ctx.fill(); }
+  BONES_L.forEach(([a,b]) => line(a,b,L,lw)); BONES_R.forEach(([a,b]) => line(a,b,R,lw));
+  line(5,6,L,lw*0.8); line(11,12,L,lw*0.8);
+  const [nx,ny] = P(0), [lx,ly] = P(3), [rx,ry] = P(4), [s5x,s5y] = P(5), [s6x,s6y] = P(6);
+  const hx = (nx+(lx+rx)/2)/2, hy = (ny+(ly+ry)/2)/2, r = o.head==='dot' ? lw*2.2 : Math.max(lw*1.4, Math.hypot(s5x-s6x, s5y-s6y)*0.36);
+  ctx.fillStyle = col('--card'); ctx.strokeStyle = L; ctx.lineWidth = lw*0.7;
+  ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2); if (!o.outline && o.head!=='dot') ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- YouTube footage (streamed, never downloaded) ----------
+let yt = null, ytReady = false, ytVideo = null, wantFoot = !window.SHARED, wantSkel = true, sound = false;
+window.onYouTubeIframeAPIReady = () => {
+  yt = new YT.Player('yt', { width:'100%', height:'100%', playerVars:{controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1, iv_load_policy:3, origin:location.origin},
+    events:{ onReady: () => { ytReady = true; yt.mute(); if (cur && !isCMU(cur)) { cueClip(); draw(); } } } });
+};
+if (!window.SHARED) (() => { const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.onerror = () => { wantFoot = false; toast('Footage unavailable offline: skeleton only'); }; document.head.appendChild(s); })();
+const footOn = () => wantFoot && ytReady && cur && !isCMU(cur);
+function cueClip(){
+  if (!ytReady || !cur || isCMU(cur)) return;
+  if (ytVideo !== cur.video){ yt.cueVideoById({videoId:cur.video, startSeconds:tAt(cur, fi)}); ytVideo = cur.video; }
+  else yt.seekTo(tAt(cur, fi), true);
+  yt.setPlaybackRate(+document.getElementById('speed').value);
+}
+
+// ---------- watch view ----------
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const tl = document.getElementById('tl'), tctx = tl.getContext('2d');
+let cur = null, fi = 0, playing = false, acc = 0, last = 0, onion = false, chrono = false;
+let marks = {in:null,out:null,holds:[],trans:[]};
+const range = () => marks.in!=null && marks.out!=null ? [Math.min(marks.in,marks.out), Math.max(marks.in,marks.out)] : [0, cur.frames.length-1];
+const nameIn = document.getElementById('mName');
+
+function load(seg, a, b){
+  setPlay(false);
+  cur = seg; marks = {in:null,out:null,holds:[],trans:[]}; chrono = false; document.getElementById('chronoBtn').classList.remove('on');
+  if (a == null && seg.range){ if (isCMU(seg)){ a = Math.round(seg.range[0]*seg.fps); b = Math.round(seg.range[1]*seg.fps); } else { a = seg.range[0]; b = seg.range[1]; } }
+  if (a != null){ marks.in = a; marks.out = Math.min(seg.frames.length-1, b); }
+  fi = marks.in ?? 0;
+  document.getElementById('angleRow').style.display = isCMU(seg) ? 'flex' : 'none';
+  document.getElementById('syncRow').style.display = isCMU(seg) ? 'none' : 'flex';
+  if (isCMU(seg)) setAngle();
+  const tcol = TYPE_COL[seg.type]; if (tcol) document.getElementById('mCol').value = tcol;
+  if (seg.suggest) nameIn.value = seg.suggest; else if (seg.type==='freeze') nameIn.value = '';
+  showMoveInfo(nameIn.value);
+  const lab = seg.type==='freeze' ? seg.parent : seg.type;
+  document.getElementById('credit').innerHTML = isCMU(seg)
+    ? `<b>CMU name: “${esc(seg.label)}”</b> · ${esc(seg.dancer)}, trial ${seg.video} · <a href="${seg.url}" target="_blank" rel="noopener">CMU page ↗</a>`
+      + (seg.suggest ? `<br>Classified as <b>${esc(seg.suggest)}</b>${seg.range ? ` (${seg.range[0]}–${seg.range[1]}s)` : ''}${seg.note ? ` · <i>${esc(seg.note)}</i>` : ''}` : (seg.note ? `<br><i>${esc(seg.note)}</i>` : ''))
+    : `<b>${esc(seg.who)}</b>${seg.stage ? ` · ${esc(seg.stage)}` : ''} · Red Bull BC One ${seg.year} · BRACE label: <span class="tag t-${lab}">${lab}</span>`
+      + (seg.auto ? ` · <b>detected freeze</b> (${seg.inverted ? 'upside down' : 'low'}): name it` : '') + ` · <a href="${ytUrl(seg, fi)}" target="_blank" rel="noopener">open on YouTube ↗</a>`;
+  updateSync(); cueClip(); renderClipMoves(); renderLib(); draw();
+}
+function updateSync(){ if (!cur || isCMU(cur)) return; const o = store.sync[cur.video]||0; document.getElementById('syncTxt').textContent = o ? `offset ${o>0?'+':''}${o.toFixed(2)}s for this battle` : `${cur.vfps} fps video`; }
+function nudge(d){ if (!cur || isCMU(cur)) return; store.sync[cur.video] = +(((store.sync[cur.video]||0) + d).toFixed(3)); save(); updateSync(); cueClip(); draw(); }
+document.getElementById('syncMinus').onclick = () => nudge(-1/(cur?.vfps||25));
+document.getElementById('syncPlus').onclick = () => nudge(1/(cur?.vfps||25));
+function setAngle(){
+  if (!cur || !cur.frames3) return;
+  const y = +document.getElementById('yaw').value, p = +document.getElementById('pitch').value;
+  project(cur, y, p); document.getElementById('angleTxt').textContent = `${y}° around · ${p}° above`;
+}
+['yaw','pitch'].forEach(id => document.getElementById(id).addEventListener('input', () => { setAngle(); draw(); }));
+
+function draw(){
+  const W = cv.width, H = cv.height, stage = document.getElementById('stage');
+  ctx.clearRect(0,0,W,H);
+  const foot = footOn(); stage.classList.toggle('nofoot', !foot);
+  document.getElementById('yt').style.visibility = foot ? 'visible' : 'hidden';
+  if (!cur){ ctx.fillStyle = col('--ink2'); ctx.font = "500 24px 'IBM Plex Mono', monospace"; ctx.textAlign='center'; ctx.fillText('pick a move or a clip on the left', W/2, H/2); drawTL(); return; }
+  if (chrono && marks.in!=null && marks.out!=null){ drawChrono(); drawTL(); return; }
+  if (foot){
+    if (wantSkel){ const sx = W/1920, sy = H/1080; drawFigure(ctx, F(cur,fi), (x,y) => [x*sx, y*sy], {lw:4, outline:true, ink:'#ffffff', acc:'#7ea2ff'}); }
+  } else {
+    const map = follow(cur, fi, W, H, 70);
+    if (onion) for (let k=8;k>=2;k-=2){ const j = fi-k; if (j>=0) drawFigure(ctx, F(cur,j), map, {lw:4, alpha:0.12+0.04*(8-k)}); }
+    drawFigure(ctx, F(cur,fi), map, {lw:10});
+  }
+  ctx.fillStyle = foot ? '#fff' : col('--ink2'); ctx.font = "500 20px Inter, sans-serif"; ctx.textAlign='left';
+  ctx.fillText(`${tAt(cur,fi).toFixed(2)}s`, 20, 34);
+  const tag = marks.holds.includes(fi) ? ['hold', col('--hold')] : marks.trans.includes(fi) ? ['exit', col('--trans')] : null;
+  if (tag){ ctx.fillStyle = tag[1]; ctx.font = "600 26px 'IBM Plex Mono', monospace"; ctx.textAlign='right'; ctx.fillText(tag[0], W-20, 40); }
+  drawTL();
+}
+function drawChrono(){
+  // after Étienne-Jules Marey's chronophotographs: one plate, time running left to right
+  const W = cv.width, H = cv.height, [a,b] = range();
+  ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0,0,W,H);
+  const idx = []; for (let f=a; f<=b; f++) idx.push(f);
+  const pts = idx.flatMap(f => { const fr = F(cur,f); return [5,6,11,12,15,16,0].map(j => [fr[j*2], fr[j*2+1]]); });
+  const xs = pts.map(p=>p[0]).sort((x,y)=>x-y), ys = pts.map(p=>p[1]).sort((x,y)=>x-y), q = (arr,t) => arr[Math.floor((arr.length-1)*t)];
+  const [x0,y0,x1,y1] = [q(xs,.02), q(ys,.02), q(xs,.98), q(ys,.98)], spread = W*0.55;
+  const s = Math.min((W-spread-140)/Math.max(1,x1-x0), (H-140)/Math.max(1,y1-y0));
+  const step = Math.max(1, Math.round(idx.length/18));
+  idx.forEach((f,k) => { if (k % step) return;
+    const dx = spread*k/Math.max(1,idx.length-1), isH = marks.holds.some(h => Math.abs(h-f)<=1), isT = marks.trans.some(h => Math.abs(h-f)<=1);
+    const c = isH ? col('--hold') : isT ? col('--trans') : '#f4f1ea';
+    drawFigure(ctx, F(cur,f), (x,y) => [(x-x0)*s + 70 + dx, (y-y0)*s + 70], {lw:2.2, alpha:0.4+0.6*k/idx.length, ink:c, acc:c, fill:'rgba(255,255,255,0.03)', head:'dot'}); });
+  ctx.fillStyle = '#f4f1ea'; ctx.font = "500 18px 'IBM Plex Mono', monospace"; ctx.textAlign='left';
+  ctx.fillText(`${nameIn.value || 'unnamed'} · ${clipTitle(cur)} · ${tAt(cur,a).toFixed(1)}–${tAt(cur,b).toFixed(1)}s`, 24, 36);
+}
+function bandsOf(s){
+  if (isCMU(s)) return (s.phases||[]);
+  if (s.auto) return [[0, s.frames.length-1, s.parent], [s.range[0], s.range[1], 'freeze']];
+  return [[0, s.frames.length-1, s.type], ...(s.freezes||[]).map(([a,b]) => [a,b,'freeze'])];
+}
+function drawTL(){
+  const W = tl.width, H = tl.height; tctx.clearRect(0,0,W,H);
+  tctx.fillStyle = col('--line'); tctx.fillRect(0, 14, W, 12);
+  if (!cur) return;
+  const n = cur.frames.length-1, X = i => i/Math.max(1,n)*W;
+  bandsOf(cur).forEach(([a,b,t]) => { tctx.fillStyle = col('--'+(t==='powermove'?'power':t)) || col('--transition'); tctx.fillRect(X(a), 14, Math.max(2, X(b)-X(a)), 12); });
+  store.moves.filter(m => m.src.uid===cur.uid).forEach(m => { tctx.strokeStyle = col('--accent'); tctx.lineWidth = 2; tctx.strokeRect(X(m.src.fIn), 3, X(m.src.fOut)-X(m.src.fIn), H-6); });
+  if (marks.in!=null){ const b = marks.out ?? fi; tctx.fillStyle = col('--accent'); tctx.globalAlpha = .3; tctx.fillRect(X(Math.min(marks.in,b)), 0, Math.abs(X(b)-X(marks.in)), H); tctx.globalAlpha = 1; }
+  marks.holds.forEach(h => { tctx.fillStyle = col('--hold'); tctx.beginPath(); tctx.moveTo(X(h),4); tctx.lineTo(X(h)+6,20); tctx.lineTo(X(h),36); tctx.lineTo(X(h)-6,20); tctx.fill(); });
+  marks.trans.forEach(h => { tctx.fillStyle = col('--trans'); tctx.fillRect(X(h)-2, 2, 4, H-4); });
+  tctx.fillStyle = col('--ink'); tctx.fillRect(X(fi)-1.5, 0, 3, H);
+}
+function seekTo(i){ fi = Math.max(0, Math.min(cur.frames.length-1, i)); if (footOn()) yt.seekTo(tAt(cur,fi), true); draw(); }
+function seekFromTL(e){ if (!cur) return; const r = tl.getBoundingClientRect(); setPlay(false); seekTo(Math.round((e.clientX-r.left)/r.width*(cur.frames.length-1))); }
+let dragging = false;
+tl.addEventListener('mousedown', e => { dragging = true; seekFromTL(e); });
+window.addEventListener('mousemove', e => { if (dragging) seekFromTL(e); });
+window.addEventListener('mouseup', () => dragging = false);
+cv.addEventListener('click', () => cur && setPlay(!playing));
+
+function setPlay(p){
+  playing = p; document.getElementById('playBtn').textContent = p ? '❚❚ Pause' : '▶ Play';
+  if (!cur || !ytReady || isCMU(cur)) return;
+  if (footOn()){ if (p){ const [lo,hi] = range(); if (fi >= hi) seekTo(lo); yt.setPlaybackRate(+document.getElementById('speed').value); yt.playVideo(); } else yt.pauseVideo(); }
+  else yt.pauseVideo();
+}
+function tick(t){
+  if (playing && cur){
+    const [lo,hi] = range();
+    if (footOn()){
+      const vt = yt.getCurrentTime() - (store.sync[cur.video]||0);
+      const i = Math.round((vt*cur.vfps - cur.start)/cur.step);
+      if (i > hi || i < lo - 3){ fi = lo; yt.seekTo(tAt(cur,lo), true); } else fi = Math.max(0, Math.min(cur.frames.length-1, i));
+    } else {
+      acc += (t-last)/1000 * cur.fps * parseFloat(document.getElementById('speed').value);
+      while (acc >= 1){ acc -= 1; fi++; if (fi > hi || fi < lo) fi = lo; }
+    }
+    draw();
+  }
+  last = t; requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+const toggleIn = (arr, v) => { const i = arr.indexOf(v); i<0 ? arr.push(v) : arr.splice(i,1); };
+const act = {
+  play: () => setPlay(!playing),
+  in: () => { marks.in = fi; if (marks.out!=null && marks.out<fi) marks.out = null; draw(); },
+  out: () => { marks.out = fi; if (marks.in==null) marks.in = 0; if (marks.out<marks.in) [marks.in,marks.out] = [marks.out,marks.in]; draw(); },
+  hold: () => { toggleIn(marks.holds, fi); draw(); },
+  exit: () => { toggleIn(marks.trans, fi); draw(); },
+};
+['play','in','out','hold','exit'].forEach(k => document.getElementById(k+'Btn').onclick = act[k]);
+document.getElementById('clearBtn').onclick = () => { marks = {in:null,out:null,holds:[],trans:[]}; draw(); };
+document.getElementById('speed').onchange = () => { if (footOn()) yt.setPlaybackRate(+document.getElementById('speed').value); };
+const tog = (id, fn) => document.getElementById(id).onclick = e => { const v = fn(); e.currentTarget.classList.toggle('on', v); draw(); };
+tog('footBtn', () => { wantFoot = !wantFoot; if (playing) setPlay(true); else if (!wantFoot && ytReady) yt.pauseVideo(); if (wantFoot) cueClip(); return wantFoot; });
+tog('skelBtn', () => (wantSkel = !wantSkel));
+tog('soundBtn', () => { sound = !sound; if (ytReady) sound ? yt.unMute() : yt.mute(); return sound; });
+tog('onionBtn', () => (onion = !onion));
+tog('chronoBtn', () => { if (marks.in==null || marks.out==null){ toast('Set In and Out first'); return false; } chrono = !chrono; if (chrono) setPlay(false); return chrono; });
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName) || !cur || !document.getElementById('v-watch').classList.contains('on')) return;
+  const k = e.key.toLowerCase(), map = {i:'in', o:'out', h:'hold', e:'exit'};
+  if (k===' '){ e.preventDefault(); act.play(); }
+  else if (k==='arrowright'){ setPlay(false); seekTo(fi+1); }
+  else if (k==='arrowleft'){ setPlay(false); seekTo(fi-1); }
+  else if (map[k]) act[map[k]]();
+});
+
+// ---------- naming ----------
+function showMoveInfo(name){
+  const el = document.getElementById('moveInfo'), m = moveByName(name);
+  if (!m){ el.hidden = true; return; }
+  const who = [m.created_by.length ? `created by <b>${esc(m.created_by.join(', '))}</b>` : '', m.taught_by.length ? `learned from <b>${esc(m.taught_by.join(', '))}</b> (frague)` : '', m.origin_style.length ? `from ${esc(m.origin_style.join(', '))}` : ''].filter(Boolean).join(' · ');
+  el.innerHTML = `<b>${esc(m.name)}</b> · ${esc(m.section || m.col)}${m.aliases.length ? ` · aka ${esc(m.aliases.join(', '))}` : ''}${who ? `<br>${who}` : ''}${m.note ? `<br><i>${esc(m.note)}</i>` : ''}`
+    + (m.wiki ? `<br>${esc(m.wiki.text)} <a href="${m.wiki.url}" target="_blank" rel="noopener">Wikipedia ↗</a>` : '')
+    + (m.clips.length ? `<br>${m.clips.map(c => `<a href="${c.url}" target="_blank" rel="noopener">${esc(c.label || 'clip')} ↗</a>`).join(' · ')}` : `<br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent('bboy '+m.name+' tutorial')}" target="_blank" rel="noopener">search tutorials ↗</a>`);
+  el.hidden = false;
+}
+nameIn.addEventListener('input', () => showMoveInfo(nameIn.value));
+nameIn.addEventListener('change', () => {
+  const dm = moveByName(nameIn.value); if (dm) nameIn.value = dm.name;
+  const ex = store.moves.find(m => norm(m.name)===norm(nameIn.value));
+  const c = ex ? ex.col : dm ? dm.col : null; if (c) document.getElementById('mCol').value = c;
+  if (chrono) draw();
+});
+function refreshDatalist(){
+  const names = allMoveNames(), al = MOVES.flatMap(m => m.aliases.map(a => `<option value="${esc(a)}">${esc(m.name)}</option>`));
+  document.getElementById('moveNames').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('') + al.join('');
+}
+document.getElementById('saveBtn').onclick = () => {
+  if (!cur) return toast('Pick a clip first');
+  const name = canon(nameIn.value); if (!name) return toast('Name the move');
+  if (marks.in==null || marks.out==null) return toast('Set In and Out');
+  store.moves.push({ id:uid(), name, col:document.getElementById('mCol').value,
+    variant:document.getElementById('mVar').value.trim(), notes:document.getElementById('mNotes').value.trim(),
+    src:{ uid:cur.uid, source:cur.source, dancer:cur.dancer, battle:cur.battle||null, who:cur.who||null, year:cur.year, video:cur.video, label:cur.label||null,
+      fIn:marks.in, fOut:marks.out, tIn:+tAt(cur,marks.in).toFixed(2), tOut:+tAt(cur,marks.out).toFixed(2), url:ytUrl(cur,marks.in), braceType:cur.type },
+    holds:[...marks.holds].sort((a,b)=>a-b), trans:[...marks.trans].sort((a,b)=>a-b), created:new Date().toISOString() });
+  save(); toast(`Saved: ${name}`);
+  marks = {in:null,out:null,holds:[],trans:[]}; document.getElementById('mVar').value = ''; document.getElementById('mNotes').value = '';
+  renderClipMoves(); renderLib(); refreshDatalist(); draw();
+};
+function renderClipMoves(){
+  const el = document.getElementById('clipMoves'), ms = cur ? store.moves.filter(m => m.src.uid===cur.uid) : [];
+  if (!ms.length){ el.innerHTML = '<div class="note">Nothing yet. Set In and Out, name it, save.</div>'; return; }
+  el.innerHTML = '';
+  ms.sort((a,b)=>a.src.fIn-b.src.fIn).forEach(m => {
+    const d = document.createElement('div'); d.className = 'mitem';
+    d.innerHTML = `<span><b>${esc(m.name)}</b>${m.variant ? ` · <i>${esc(m.variant)}</i>` : ''}<br><span class="note">${tAt(cur,m.src.fIn).toFixed(1)}–${tAt(cur,m.src.fOut).toFixed(1)}s</span></span><span class="x">✕</span>`;
+    d.onclick = e => { if (e.target.classList.contains('x')){ store.moves = store.moves.filter(x => x.id!==m.id); save(); renderClipMoves(); renderLib(); draw(); return; }
+      marks = {in:m.src.fIn, out:m.src.fOut, holds:[...m.holds], trans:[...m.trans]}; nameIn.value = m.name; showMoveInfo(m.name); seekTo(m.src.fIn); };
+    el.appendChild(d);
+  });
+}
+
+// ---------- library: by move / by clip ----------
+let libMode = 'moves', openMove = null;
+document.getElementById('libMoves').onclick = () => { libMode = 'moves'; renderLib(); };
+document.getElementById('libClips').onclick = () => { libMode = 'clips'; renderLib(); };
+['mSearch','fDancer'].forEach(id => document.getElementById(id).oninput = renderLib);
+['fSrc','fType'].forEach(id => document.getElementById(id).onchange = renderLib);
+function renderLib(){
+  document.getElementById('libMoves').classList.toggle('on', libMode==='moves');
+  document.getElementById('libClips').classList.toggle('on', libMode==='clips');
+  document.getElementById('libMovesBox').hidden = libMode!=='moves';
+  document.getElementById('libClipsBox').hidden = libMode!=='clips';
+  libMode==='moves' ? renderMoveLib() : renderClipLib();
+}
+function clipRow(s, a, b, extra){
+  const d = document.createElement('div');
+  d.className = 'item' + (cur && cur.uid===s.uid && (a==null || marks.in===a) ? ' on' : '');
+  const when = a!=null ? `${tAt(s,a).toFixed(1)}s` : `${(s.frames.length/s.fps).toFixed(1)}s`;
+  d.innerHTML = `<div style="min-width:0"><b>${esc(clipTitle(s))}</b><div class="meta">${esc([extra, clipMeta(s), when].filter(Boolean).join(' · '))}</div></div>`;
+  d.title = s.battle || s.label || '';
+  d.onclick = () => load(s, a, b);
+  return d;
+}
+function mineRow(m){
+  const d = document.createElement('div'); d.className = 'item';
+  d.innerHTML = `<div style="min-width:0"><b>${esc(sessionLabel(m.clip))}</b> <span class="tag t-freeze" style="margin-left:4px">mine</span><div class="meta">${esc([m.variant, `${m.t0.toFixed(1)}–${m.t1.toFixed(1)}s`].filter(Boolean).join(' · '))}</div></div>`;
+  d.onclick = () => { showView('clip'); window.__clipApi && window.__clipApi.open(m.clip, m.t0, m.t1); };
+  return d;
+}
+function renderMoveLib(){
+  const el = document.getElementById('moveLib'), q = norm(document.getElementById('mSearch').value); el.innerHTML = '';
+  const named = new Map();
+  allMoveNames().forEach(n => { const c = clipsFor(n); if (c.length) named.set(n, c); });
+  const matches = n => !q || norm(n).includes(q) || (moveByName(n)?.aliases||[]).some(a => norm(a).includes(q));
+  COLS.forEach(C => {
+    el.insertAdjacentHTML('beforeend', `<div class="grp"><i style="background:var(${COLVAR[C]})"></i>${C}</div>`);
+    const list = [...named.keys()].filter(n => colOf(n)===C && matches(n)).sort();
+    list.forEach(n => {
+      const clips = named.get(n), d = document.createElement('div'); d.className = 'item';
+      d.innerHTML = `<b>${esc(n)}</b><span class="count">${clips.length}</span>`;
+      const firstBrace = clips.find(c => !c.mine);
+      d.onclick = () => { openMove = openMove===n ? null : n; renderMoveLib(); if (openMove && firstBrace) load(firstBrace.seg, firstBrace.a, firstBrace.b); };
+      el.appendChild(d);
+      if (openMove===n){ const sub = document.createElement('div'); sub.className = 'sub';
+        clips.forEach(c => sub.appendChild(c.mine ? mineRow(c.mine) : clipRow(c.seg, c.a, c.b, c.auto ? 'classified' : c.mark.variant))); el.appendChild(sub); }
+    });
+    const unnamed = C==='Freeze' ? SEGS.filter(s => s.auto && !store.moves.some(m => m.src.uid===s.uid))
+      : SEGS.filter(s => !s.auto && TYPE_COL[s.type]===C);
+    if (unnamed.length && !q){
+      const key = 'un-'+C, d = document.createElement('div'); d.className = 'item';
+      d.innerHTML = `<span class="note">${C==='Freeze' ? 'Detected freezes · name them' : 'Unnamed '+C.toLowerCase()+' clips'}</span><span class="count">${unnamed.length}</span>`;
+      d.onclick = () => { openMove = openMove===key ? null : key; renderMoveLib(); };
+      el.appendChild(d);
+      if (openMove===key){ const sub = document.createElement('div'); sub.className = 'sub';
+        unnamed.forEach(s => sub.appendChild(clipRow(s, null, null, s.auto ? `${((s.range[1]-s.range[0]+1)/s.fps).toFixed(1)}s hold${s.inverted ? ', upside down' : ''}` : ''))); el.appendChild(sub); }
+    }
+    if (!list.length && !unnamed.length) el.insertAdjacentHTML('beforeend', '<div class="note" style="padding:2px 6px">none yet</div>');
+  });
+  if (q){
+    const extra = MOVES.filter(m => matches(m.name) && !named.has(m.name));
+    if (extra.length){ el.insertAdjacentHTML('beforeend', '<div class="grp">In the dictionary, no clip yet</div>');
+      extra.forEach(m => { const d = document.createElement('div'); d.className = 'item'; d.innerHTML = `<span>${esc(m.name)}</span><span class="tag t-${m.col.toLowerCase()}" style="margin-left:auto">${m.col}</span>`;
+        d.onclick = () => { nameIn.value = m.name; nameIn.dispatchEvent(new Event('change')); showMoveInfo(m.name); toast('Now find a clip of it under By clip'); }; el.appendChild(d); }); }
+  }
+}
+function renderClipLib(){
+  const t = document.getElementById('fType').value, d = norm(document.getElementById('fDancer').value), sr = document.getElementById('fSrc').value;
+  const list = SEGS.filter(s => (!sr || s.source===sr) && (!t || s.type===t) && (!d || norm([s.who, s.battle, s.label, s.dancer].join(' ')).includes(d)));
+  document.getElementById('clipCount').textContent = `${list.length} clips`;
+  const el = document.getElementById('clipLib'); el.innerHTML = '';
+  list.forEach(s => { const r = clipRow(s); const n = store.moves.filter(m => m.src.uid===s.uid).length;
+    r.insertAdjacentHTML('beforeend', `${n ? `<span class="count">${n}</span>` : ''}<span class="tag t-${s.type}" style="margin-left:${n?'4px':'auto'}">${s.auto ? 'freeze?' : s.type}</span>`); el.appendChild(r); });
+}
+
+// ---------- connect ----------
+let chain = [], chainNotes = [];
+function observedSets(){
+  const by = {}; store.moves.forEach(m => { const s = segById[m.src.uid]; if (!s || isCMU(s)) return; (by[roundKey(s)] ||= []).push({m, t0:tAt(s,m.src.fIn), t1:tAt(s,m.src.fOut)}); });
+  const sets = [];
+  Object.values(by).forEach(arr => { arr.sort((a,b)=>a.t0-b.t0); let ch = [arr[0]];
+    for (let i=1;i<=arr.length;i++){ const B = arr[i]; if (B && B.t0 - ch[ch.length-1].t1 < 3) ch.push(B); else { if (ch.length>1) sets.push(ch.map(c=>c.m)); ch = B ? [B] : []; } } });
+  return sets;
+}
+function edges(){
+  const out = new Map(), add = (a,b,kind) => { const k = norm(a)+'→'+norm(b); const e = out.get(k) || {a, b, done:0, seen:0, idea:0}; e[kind]++; out.set(k, e); };
+  store.sets.forEach(s => s.path.forEach((n,i) => i && add(s.path[i-1], n, 'done')));
+  store.ideas.forEach(s => s.path.forEach((n,i) => i && add(s.path[i-1], n, s.tried ? 'done' : 'idea')));
+  store.links.forEach(l => add(l.a, l.b, 'done'));
+  observedSets().forEach(s => s.forEach((m,i) => i && add(s[i-1].name, m.name, 'seen')));
+  return [...out.values()];
+}
+function linkStatus(a,b,E=edges()){
+  const e = E.find(e => norm(e.a)===norm(a) && norm(e.b)===norm(b));
+  if (!e) return ['new','never connected'];
+  if (e.done) return ['done', `in ${e.done} set${e.done>1?'s':''}`];
+  if (e.seen) return ['seen','seen in BC One'];
+  return ['idea','idea'];
+}
+function addToChain(n){ chain.push(canon(n)); chainNotes.push(''); renderConnect(); }
+function renderPalette(){
+  const el = document.getElementById('palette'), q = norm(document.getElementById('pSearch').value); el.innerHTML = '';
+  const names = allMoveNames().filter(n => !q || norm(n).includes(q) || (moveByName(n)?.aliases||[]).some(a => norm(a).includes(q)));
+  const withClip = new Set(names.filter(n => clipsFor(n).length).map(norm));
+  COLS.forEach(C => {
+    const list = names.filter(n => colOf(n)===C).sort((a,b) => (withClip.has(norm(b)) - withClip.has(norm(a))) || a.localeCompare(b));
+    if (!list.length) return;
+    el.insertAdjacentHTML('beforeend', `<div class="grp"><i style="background:var(${COLVAR[C]})"></i>${C}</div>`);
+    const box = document.createElement('div'); box.className = 'chips';
+    list.forEach(n => { const c = document.createElement('span'); c.className = 'chip'; c.innerHTML = `${withClip.has(norm(n)) ? '<span class="dot"></span>' : ''}${esc(n)}`; c.onclick = () => addToChain(n); box.appendChild(c); });
+    el.appendChild(box);
+  });
+}
+document.getElementById('pSearch').oninput = renderPalette;
+document.getElementById('pSearch').onkeydown = e => { if (e.key==='Enter' && e.target.value.trim()){ addToChain(e.target.value.trim()); e.target.value = ''; renderPalette(); } };
+let thumbs = [];
+function thumbFor(canvas, name){
+  const c = clipsFor(name).find(c => c.seg);
+  if (!c){ const g = canvas.getContext('2d'); g.fillStyle = col('--ink2'); g.font = "500 15px 'IBM Plex Mono', monospace"; g.textAlign = 'center'; g.fillText('no clip yet', canvas.width/2, canvas.height/2+5); return; }
+  thumbs.push({cv:canvas, seg:c.seg, a:c.a, b:c.b, f:c.a});
+}
+function renderChain(){
+  const el = document.getElementById('chain'); el.innerHTML = ''; thumbs = [];
+  if (!chain.length){ el.innerHTML = '<div class="empty">Click moves on the left to chain them.<br>Each arrow shows whether you\'ve done that transition, seen it in a battle, or never connected it.</div>'; return; }
+  const E = edges();
+  chain.forEach((n,i) => {
+    if (i){ const [st, lab] = linkStatus(chain[i-1], n, E), l = document.createElement('div'); l.className = 'link';
+      l.innerHTML = `<span class="arr">→</span><span class="st ${st}">${lab}</span>`;
+      l.title = 'Click to note how you get from one to the other';
+      l.onclick = () => { if (l.querySelector('input')) return; const inp = document.createElement('input'); inp.id = 'linknote-'+i; inp.placeholder = 'how do you get there?'; inp.value = chainNotes[i]||''; inp.style.cssText = 'width:120px;font-size:11px;padding:2px 6px';
+        inp.onkeydown = e => { if (e.key==='Enter') inp.blur(); }; inp.onblur = () => { chainNotes[i] = inp.value.trim(); renderChain(); }; l.appendChild(inp); inp.focus(); };
+      el.appendChild(l); }
+    const c = document.createElement('div'); c.className = 'mcard';
+    c.innerHTML = `<span class="x cx">✕</span><canvas width="240" height="240"></canvas><div class="nm">${esc(n)}</div><div class="note">${colOf(n)}</div>${chainNotes[i] ? `<div class="linknote">↳ ${esc(chainNotes[i])}</div>` : ''}`;
+    c.querySelector('.x').onclick = () => { chain.splice(i,1); chainNotes.splice(i,1); if (chainNotes.length) chainNotes[0] = ''; renderConnect(); };
+    el.appendChild(c);
+    thumbFor(c.querySelector('canvas'), n);
+  });
+}
+function renderNext(){
+  const el = document.getElementById('nextPanel');
+  const chamberHtml = `<h4>Stuck?</h4><button class="pill" id="chamber">One in the chamber</button><div class="note" style="margin-top:4px">Two moves you've never connected. Invent the way between. (From Scott Tolinski's The Break.)</div>`;
+  if (!chain.length){ el.innerHTML = `<h3>Where next</h3><div class="note">Start a chain and this suggests where to go from the last move, including transitions you've never tried.</div>${chamberHtml}`; }
+  else {
+    const lastN = chain[chain.length-1], E = edges(), C = colOf(lastN);
+    const gone = E.filter(e => norm(e.a)===norm(lastN)).sort((a,b) => (b.done+b.seen) - (a.done+a.seen));
+    const nextCols = {Toprock:['Footwork','Toprock'], Footwork:['Power','Freeze','Footwork'], Power:['Freeze','Power','Footwork'], Freeze:['Footwork','Power','Toprock']}[C] || COLS;
+    const pool = allMoveNames().filter(n => nextCols.includes(colOf(n)) && norm(n)!==norm(lastN) && !E.some(e => norm(e.a)===norm(lastN) && norm(e.b)===norm(n)));
+    const yours = pool.filter(n => clipsFor(n).length), rest = pool.filter(n => !clipsFor(n).length);
+    const pick = arr => arr.slice().sort(() => Math.random()-.5).slice(0, 8);
+    const chips = arr => `<div class="chips">${arr.map(n => `<span class="chip" data-n="${esc(n)}">${clipsFor(n).length ? '<span class="dot"></span>' : ''}${esc(n)}</span>`).join('')}</div>`;
+    el.innerHTML = `<h3>Where next from ${esc(lastN)}</h3>`
+      + `<h4>You've gone to</h4>${gone.length ? `<div class="chips">${gone.map(e => `<span class="chip" data-n="${esc(e.b)}">${esc(e.b)} <span class="note">${e.done ? '✓' : e.seen ? 'seen' : 'idea'}</span></span>`).join('')}</div>` : '<div class="note">nothing yet</div>'}`
+      + `<h4>Never tried from here (${nextCols.join(' / ')})</h4>${pool.length ? chips([...pick(yours), ...pick(rest)].slice(0, 10)) : '<div class="note">you\'ve tried everything</div>'}`
+      + chamberHtml;
+    el.querySelectorAll('[data-n]').forEach(c => c.onclick = () => addToChain(c.dataset.n));
+  }
+  el.querySelector('#chamber').onclick = () => {
+    const ns = [...allMoveNames().filter(n => clipsFor(n).length), ...MOVES.slice().sort(() => Math.random()-.5).slice(0,20).map(m => m.name)];
+    const E = edges(); let a, b, tries = 0;
+    do { a = ns[Math.floor(Math.random()*ns.length)]; b = ns[Math.floor(Math.random()*ns.length)]; tries++; } while ((norm(a)===norm(b) || linkStatus(a,b,E)[0]!=='new') && tries < 200);
+    chain = [a, b]; chainNotes = ['', '']; renderConnect(); toast('Invent the transition, then save it as an idea');
+  };
+}
+function renderGraph(){
+  const gc = document.getElementById('gcanvas'); gc.querySelectorAll('.gnode,.gcol').forEach(e => e.remove());
+  const W = Math.max(560, gc.clientWidth), H = 460, E = edges();
+  const names = [...new Map([...allMoveNames().filter(n => clipsFor(n).length), ...E.flatMap(e => [e.a, e.b]), ...chain].map(n => [norm(n), n])).values()];
+  const pos = {};
+  COLS.forEach((C,ci) => { const x = W*(ci+0.5)/4, list = names.filter(n => colOf(n)===C);
+    gc.insertAdjacentHTML('beforeend', `<div class="gcol" style="left:${x}px;color:var(${COLVAR[C]})">${C.toUpperCase()}</div>`);
+    list.forEach((n,i) => { pos[norm(n)] = {x: x + (list.length>6 ? (i%2 ? 50 : -50) : 0), y: 60 + (H-90)*(list.length===1 ? .4 : i/(list.length-1))}; }); });
+  if (!names.length) gc.insertAdjacentHTML('beforeend', `<div class="gcol" style="left:50%;top:45%;color:var(--ink2);letter-spacing:0;font-weight:500">Your map fills in as you name moves and save chains.</div>`);
+  names.forEach(n => { const p = pos[norm(n)]; if (!p) return; const d = document.createElement('div');
+    d.className = 'gnode' + (clipsFor(n).length ? ' has' : '') + (chain.some(c => norm(c)===norm(n)) ? ' inchain' : '');
+    d.style.left = p.x+'px'; d.style.top = p.y+'px'; d.textContent = n; d.onclick = () => addToChain(n); gc.appendChild(d); });
+  const svg = document.getElementById('gsvg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const mk = (id,c) => `<marker id="${id}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="5" markerHeight="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+  let h = `<defs>${mk('m-done',col('--ink'))}${mk('m-seen',col('--accent'))}${mk('m-idea',col('--hold'))}</defs>`;
+  E.forEach(e => { const p = pos[norm(e.a)], q = pos[norm(e.b)]; if (!p || !q) return;
+    const kind = e.done ? 'done' : e.seen ? 'seen' : 'idea', c = col(kind==='done' ? '--ink' : kind==='seen' ? '--accent' : '--hold');
+    const dx = q.x-p.x, dy = q.y-p.y, L = Math.hypot(dx,dy)||1, ex = q.x - dx/L*30, ey = q.y - dy/L*14, mx = (p.x+ex)/2 - dy/L*30, my = (p.y+ey)/2 + dx/L*30;
+    h += `<path d="M${p.x},${p.y} Q${mx},${my} ${ex},${ey}" fill="none" stroke="${c}" stroke-width="${1.5+Math.min(4,e.done+e.seen)}" ${kind==='idea' ? 'stroke-dasharray="5 5"' : ''} marker-end="url(#m-${kind})"/>`; });
+  svg.innerHTML = h;
+}
+function renderConnect(){ renderPalette(); renderChain(); renderNext(); renderGraph(); }
+function saveChain(kind){
+  if (chain.length < 2) return toast('Chain at least two moves');
+  const rec = {id:uid(), path:[...chain], notes:[...chainNotes], name:document.getElementById('chainName').value.trim(), created:new Date().toISOString(), tried: kind==='set'};
+  (kind==='set' ? store.sets : store.ideas).unshift(rec); save();
+  toast(kind==='set' ? 'Saved to your sets' : 'Saved as an idea'); chain = []; chainNotes = []; document.getElementById('chainName').value = ''; renderConnect(); refreshDatalist();
+}
+document.getElementById('saveSet').onclick = () => saveChain('set');
+document.getElementById('saveIdea').onclick = () => saveChain('idea');
+document.getElementById('clearChain').onclick = () => { chain = []; chainNotes = []; renderConnect(); };
+
+let tLast = 0, tAcc = 0;
+(function thumbTick(t){
+  tAcc += (t - tLast)/1000*12; const step = Math.floor(tAcc); tAcc -= step; tLast = t;
+  if (step && document.getElementById('v-connect').classList.contains('on')) thumbs.forEach(th => { th.f += step; if (th.f > th.b) th.f = th.a;
+    const g = th.cv.getContext('2d'); g.clearRect(0,0,th.cv.width,th.cv.height);
+    drawFigure(g, F(th.seg, th.f), follow(th.seg, th.f, th.cv.width, th.cv.height, 26), {lw:5}); });
+  requestAnimationFrame(thumbTick);
+})(0);
+
+// ---------- log ----------
+const pathHtml = (p, notes=[]) => `<div class="chips" style="margin:4px 0">${p.map((n,k) => `${k ? `<span class="arrow">→${notes[k] ? ` <i>${esc(notes[k])}</i>` : ''}</span>` : ''}<span class="chip" style="cursor:default">${esc(n)}</span>`).join('')}</div>`;
+function renderLog(){
+  const card = (r, kind) => `<div class="card">${r.name ? `<b>${esc(r.name)}</b>` : ''}${pathHtml(r.path, r.notes)}${r.note ? `<div>${esc(r.note)}</div>` : ''}
+    <div class="row"><span class="when">${new Date(r.created).toLocaleDateString()}</span><span class="spacer"></span>
+    ${kind==='idea' ? `<button class="pill sm" data-tried="${r.id}">I did it ✓</button>` : ''}<button class="pill sm" data-load="${kind}:${r.id}">open in Connect</button><button class="pill sm" data-del="${kind}:${r.id}">✕</button></div></div>`;
+  const ideas = store.ideas.filter(i => !i.tried);
+  document.getElementById('setList').innerHTML = store.sets.length ? store.sets.map(r => card(r,'set')).join('') : '<div class="note">Chain moves in Connect and save them as a set you can do.</div>';
+  document.getElementById('ideaList').innerHTML = ideas.length ? ideas.map(r => card(r,'idea')).join('') : '<div class="note">Ideas you haven\'t tried yet land here.</div>';
+  let combos = []; try { combos = JSON.parse(localStorage.getItem('brace-marker-combos')) || []; } catch(e) {}
+  document.getElementById('comboList').innerHTML = combos.length ? combos.map((c,k) => `<div class="card"><b>${esc(c.name)}</b>${pathHtml(c.moves.map(m => m.name + (m.variant ? ` (${m.variant})` : '')))}<div class="row"><span class="when">${esc(sessionLabel(c.clip||''))}</span><span class="spacer"></span><button class="pill sm" data-combo="${k}">open in Connect</button></div></div>`).join('') : '<div class="note">Label a clip in My sessions and save it as a combo.</div>';
+  document.querySelectorAll('[data-combo]').forEach(b => b.onclick = () => { const c = combos[+b.dataset.combo]; chain = c.moves.map(m => m.name); chainNotes = c.moves.map(() => ''); showView('connect'); });
+  const seen = observedSets();
+  document.getElementById('seenList').innerHTML = seen.length ? seen.map(s => `<div class="card"><b>${esc(srcLabel(s[0].src))}</b>${pathHtml(s.map(m => m.name + (m.variant ? ` (${m.variant})` : '')))}<a href="${s[0].src.url}" target="_blank" rel="noopener">original ↗</a></div>`).join('') : '<div class="note">Name two moves back to back in one round to see them here.</div>';
+  const v = document.getElementById('v-log');
+  v.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { const [k,id] = b.dataset.del.split(':'); const key = k==='set' ? 'sets' : 'ideas'; store[key] = store[key].filter(x => x.id!==id); save(); renderLog(); });
+  v.querySelectorAll('[data-tried]').forEach(b => b.onclick = () => { const i = store.ideas.find(x => x.id===b.dataset.tried); store.ideas = store.ideas.filter(x => x!==i); i.tried = true; store.sets.unshift(i); save(); renderLog(); toast('Moved to your sets'); });
+  v.querySelectorAll('[data-load]').forEach(b => b.onclick = () => { const [k,id] = b.dataset.load.split(':'); const r = (k==='set' ? store.sets : store.ideas).find(x => x.id===id); chain = [...r.path]; chainNotes = [...(r.notes||[])]; showView('connect'); });
+}
+
+// ---------- nav / export ----------
+function showView(v){
+  _sessMoves = null;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.view===v));
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id==='v-'+v));
+  if (v!=='watch') setPlay(false);
+  if (v==='connect') renderConnect(); if (v==='log') renderLog(); if (v==='watch'){ refreshDatalist(); renderLib(); draw(); }
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => showView(b.dataset.view));
+document.getElementById('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify({exported:new Date().toISOString(), sources:['BRACE (Moltisanti et al., ECCV 2022)','CMU Graphics Lab Motion Capture Database','FraGue Breakdance Move List'], ...store}, null, 2)], {type:'application/json'});
+  if (window.SHARED){ blob.text().then(t => navigator.clipboard.writeText(t).then(() => toast('Copied your moves as JSON'), () => toast('Copy blocked here'))); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `named-moves-${new Date().toISOString().slice(0,10)}.json`; a.click();
+};
+document.getElementById('importIn').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const d = JSON.parse(await f.text()); store = {moves:d.moves||[], links:d.links||[], ideas:(d.ideas||[]).map(i => Object.assign({notes:[], name:''}, i)), sets:d.sets||[], sync:d.sync||{}}; save(); toast('Imported'); refreshDatalist(); renderLib(); }
+  catch(err){ toast('Could not read that file'); }
+};
+window.addEventListener('resize', () => { if (document.getElementById('v-connect').classList.contains('on')) renderGraph(); });
+
+refreshDatalist(); renderLib();
+const first = SEGS.find(s => s.auto && /lil zoo/i.test(s.who||'')) || SEGS.find(s => s.auto) || SEGS[0];
+if (first) load(first);
+})();
+</script>
+</body>
+</html>
